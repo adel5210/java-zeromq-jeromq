@@ -25,6 +25,9 @@ public class ZeromqApplication implements CommandLineRunner {
 
 	}
 
+	/**
+	 * Send single request
+	 */
 	private void requestResponseMessagingClient(){
 		try (final ZContext context = new ZContext()){
 			final ZMQ.Socket socket = context.createSocket(SocketType.REQ);//short for request
@@ -37,6 +40,9 @@ public class ZeromqApplication implements CommandLineRunner {
 		}
 	}
 
+	/**
+	 * Receive and send single
+	 */
 	private void  requestResponseMessagingServer(){
 		try(final ZContext context = new ZContext()){
 			final ZMQ.Socket socket = context.createSocket(SocketType.REP);// short for reply
@@ -47,6 +53,7 @@ public class ZeromqApplication implements CommandLineRunner {
 			socket.send(response.getBytes(ZMQ.CHARSET), 0);
 		}
 	}
+
 
 	private void routerClient(){
 		try(final ZContext context = new ZContext()){
@@ -59,6 +66,9 @@ public class ZeromqApplication implements CommandLineRunner {
 		}
 	}
 
+	/**
+	 * Handling multiple request
+	 */
 	private void routerServer(){
 		try(final ZContext context = new ZContext()){
 			ZMQ.Socket broker = context.createSocket(SocketType.ROUTER);
@@ -73,6 +83,26 @@ public class ZeromqApplication implements CommandLineRunner {
 			broker.sendMore("");
 			broker.send("Received as router!!!");
 
+		}
+	}
+
+	private void publisher(){
+		try(final ZContext context = new ZContext()){
+			ZMQ.Socket pub = context.createSocket(SocketType.PUB);
+			pub.bind("tcp://*:5555");
+
+			pub.send("Hello all");
+
+		}
+	}
+
+	private void subscriber(){
+		try(final ZContext context = new ZContext()){
+			ZMQ.Socket sub = context.createSocket(SocketType.SUB);
+			sub.connect("tcp://localhost:5555");
+			sub.subscribe("".getBytes());
+
+			String message = sub.recvStr();
 		}
 	}
 }
